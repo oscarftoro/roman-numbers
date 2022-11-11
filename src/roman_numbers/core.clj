@@ -9,15 +9,14 @@
 ; to parse (we group up repeated M, X, C, or I)
 (def roman-number-parser-regex #"^(M?)(M?)(M?)(CM|CD|D?)(C?)(C?)(C?)(XC|XL|L?)(X?)(X?)(X?)(IX|IV|V?)(I?)(I?)(I?)")
 
+; some specs
 (s/def ::roman-number (s/and string? #(re-matches roman-number-regex %)))
-(s/def ::roman-unit #{"I" "IV" "V" "IX" "X" "XL" "L" "XC" "C" "CD" "D" "CM" "M"})
-(s/def ::roman-numeral #{\I \V \X \L \C \D \M})
-(s/def ::previous char?)
-(s/def ::current char?)
-(s/def ::acc pos-int?)
-(s/def ::counter #(and (fn [counter] (> counter 0))         ;counter checks that a numeral only repeats 3 times maximum
-                       (fn [counter] (<= counter 3))))
 (s/def ::integer (s/and pos-int? #(<= 3999 %)))
+(s/def ::digit-return (s/and vector?
+                             #(<= (rand-nth %) 4)
+                             #(<= (first %) 3)
+                             #(<= (second %) 9))
+  )
 
 (def roman-str->int {"I"  1                                 ; roman numerals and substracted cases
                      "IV" 4
@@ -74,11 +73,14 @@
    :post [(s/valid? vector? %) (s/valid? string? (rand-nth %))]}
   (vec (re-matches roman-number-parser-regex roman-number)))
 
+(s/fdef roman-number->int
+        :args (s/cat :roman-number string?)
+        :ret int?)
+
 (defn roman-number->int [^String roman-number]
-  (let [number-vec  (try (->> (group roman-number)
-                              (drop 1)
-                              vec)
-                         (catch Exception e (prn "Invalid roman number" (:message e))))
+  (let [number-vec  (->> (group roman-number)
+                         (drop 1)
+                         vec)
         numbers-vec (vec (remove empty? number-vec))]
     (->> numbers-vec
          (r/map roman-str->int)
@@ -90,6 +92,10 @@
                    2 2                                      ; decimal
                    3 1                                      ; hundreds
                    4 0})                                    ; thousands
+
+(s/fdef digits
+        :args (s/cat :n ::integer)
+        :ret ::digit-return)
 
 (defn- digits
   [n]
@@ -114,7 +120,7 @@
   "Pseudo smart function that given a number or an integer
    between [1 - 3999] Returns a meaningful result. A number
    for a valid roman number and a string representing a roman number for
-   a number"
+   an integer [1 - 3999]. Inputs 0 and n > 4000 returns an empty string."
   [input]
   (try
     (if (string? input)
