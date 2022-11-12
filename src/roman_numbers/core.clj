@@ -15,8 +15,7 @@
 (s/def ::digit-return (s/and vector?
                              #(<= (rand-nth %) 4)
                              #(<= (first %) 3)
-                             #(<= (second %) 9))
-  )
+                             #(<= (second %) 9)))
 
 (def roman-str->int {"I"  1                                 ; roman numerals and substracted cases
                      "IV" 4
@@ -88,10 +87,10 @@
 
 ;; a digit 1 has length 1; 10 has length 2; 100 -> 3 and 1000 -> 4
 ;; the amount of necessary drops in a list of units [1000 100 10 1]
-(def length->unit {1 3                                      ; unary
-                   2 2                                      ; decimal
-                   3 1                                      ; hundreds
-                   4 0})                                    ; thousands
+(def length->drop-amount {1 3                               ; unary
+                          2 2                               ; decimal
+                          3 1                               ; hundreds
+                          4 0})                             ; thousands
 
 (s/fdef digits
         :args (s/cat :n ::integer)
@@ -108,8 +107,8 @@
   [i]
   {:pre  (s/valid? ::integer i)
    :post (s/valid? ::roman-number %)}
-  (let [unit  (length->unit (-> i str count))
-        units (drop unit [1000 100 10 1])]
+  (let [drop-amount  (length->drop-amount (-> i str count))
+        units (drop drop-amount [1000 100 10 1])]
     (->> (digits i)
          (map vector units)                                 ; zip i with units
          (map (partial apply *))                            ; multiply units with digits
@@ -117,8 +116,8 @@
          (apply str))))
 
 (defn operation
-  "Pseudo smart function that given a number or an integer
-   between [1 - 3999] Returns a meaningful result. A number
+  "Pseudo smart function that given a roman number or an integer
+   between [1 - 3999], returns a meaningful result. A number
    for a valid roman number and a string representing a roman number for
    an integer [1 - 3999]. Inputs 0 and n > 4000 returns an empty string."
   [input]
