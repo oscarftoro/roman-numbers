@@ -4,8 +4,8 @@
 
 
 (deftest to-roman-test
-  (testing "That the convertion between integer a-number to roman-number and the opposite is equivalent to a-number")
-  (let [a-number (rand-int 4000)]
-    (is (= a-number (roman-number->int (int->roman-number a-number))))))
+  (testing "The conversion between integer i to roman-number and the opposite is i")
+  (let [i (rand-int 4000)]
+    (is (= i (roman-number->int (int->roman-number i))))))
 
 
