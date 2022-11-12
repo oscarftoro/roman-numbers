@@ -14,8 +14,7 @@
 (s/def ::integer (s/and pos-int? #(<= 3999 %)))
 (s/def ::digit-return (s/and vector?
                              #(<= (rand-nth %) 4)
-                             #(<= (first %) 3)
-                             #(<= (second %) 9)))
+                             #(<= (first %) 3)))
 
 (def roman-str->int {"I"  1                                 ; roman numerals and substracted cases
                      "IV" 4
@@ -85,7 +84,7 @@
          (r/map roman-str->int)
          (r/reduce +))))
 
-;; a digit 1 has length 1; 10 has length 2; 100 -> 3 and 1000 -> 4
+;; a digit 1 has length 1; 10 has length 2; 100 -> 3 ...
 ;; the amount of necessary drops in a list of units [1000 100 10 1]
 (def length->drop-amount {1 3                               ; unary
                           2 2                               ; decimal
