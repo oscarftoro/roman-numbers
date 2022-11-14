@@ -5,12 +5,13 @@
 
 ; to validate
 (def roman-number-regex #"^M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})")
-
+; from https://www.oreilly.com/library/view/regular-expressions-cookbook/9780596802837/ch06s09.html
+(def rno #"^(?=[MDCLXVI])M*(C[MD]|D?C{0,3})(X[CL]|L?X{0,3})(I[XV]|V?I{0,3})$")
 ; to parse (we group up repeated M, X, C, or I)
 (def roman-number-parser-regex #"^(M?)(M?)(M?)(CM|CD|D?)(C?)(C?)(C?)(XC|XL|L?)(X?)(X?)(X?)(IX|IV|V?)(I?)(I?)(I?)")
 
 ; some specs
-(s/def ::roman-number (s/and string? #(re-matches roman-number-regex %)))
+(s/def ::roman-number (s/and string? #(re-matches rno #_roman-number-regex %)))
 (s/def ::integer (s/and pos-int? #(<= 3999 %)))
 (s/def ::digit-return (s/and vector?
                              #(<= (rand-nth %) 4)

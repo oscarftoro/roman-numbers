@@ -1,5 +1,7 @@
 (ns roman-numbers.core-test
   (:require [clojure.test :refer :all]
+            [clojure.spec.alpha :as s]
+            [clojure.spec.gen.alpha :as gen]
             [roman-numbers.core :refer :all]))
 
 
