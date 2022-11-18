@@ -6,8 +6,6 @@
 ; to validate
 (def roman-number-regex #"^M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})")
 
-; from https://www.oreilly.com/library/view/regular-expressions-cookbook/9780596802837/ch06s09.html
-(def rno #"^(?=[MDCLXVI])M*(C[MD]|D?C{0,3})(X[CL]|L?X{0,3})(I[XV]|V?I{0,3})$")
 ; to parse (we group up repeated M, X, C, or I)
 (def roman-number-parser-regex #"^(M?)(M?)(M?)(CM|CD|D?)(C?)(C?)(C?)(XC|XL|L?)(X?)(X?)(X?)(IX|IV|V?)(I?)(I?)(I?)")
 
@@ -30,26 +28,51 @@
 ; how can we help the generator without interfering shrinking?
 (s/def ::tens-units (s/and string?
                            #(str/starts-with? (roman-tens %) %)
-                           #(str/ends-with? (roman-units %) %)))
+                           #(str/ends-with? (roman-units %) %))) ; nej
 
-(defn roman-numeral-builder
-  ([this that] (str ((comp rand-nth vec) this)
-                    ((comp rand-nth vec) that)))
-  ([this that and-that] (str ((comp rand-nth vec) this)
-                             ((comp rand-nth vec) that)
-                             ((comp rand-nth vec) and-that))))
+; what about a series of specialized generators?
+(def roman-units-gen (gen/such-that #(not= % empty?) (gen/elements roman-units)))
+(def roman-tens-gen (gen/such-that #(not= % empty?) (gen/elements roman-tens)))
+(def roman-hundreds-gen (gen/such-that #(not= % empty?) (gen/elements roman-hundreds)))
+(def roman-thousand-units-gen (gen/such-that #(not= % empty?) (gen/elements roman-thousand-units)))
 
-(defn tens-units [] (roman-numeral-builder roman-tens roman-units))
 
-(defn hundreds-units [] (roman-numeral-builder roman-hundreds roman-units))
-(defn hundreds-tens-unit [] (roman-numeral-builder roman-hundreds roman-tens roman-units))
+#_(defn roman-numeral-builder-gen [& [args]]                ; for an obscure reason this do not work
+    (gen/fmap (partial apply str) (gen/tuple args)))
 
-(defn thousand-units-units [] (roman-numeral-builder roman-thousand-units roman-units))
-(defn thousand-units-hundreds-tens [] (roman-numeral-builder roman-thousand-units roman-hundreds roman-tens))
-(defn thousand-units-hundreds [] (roman-numeral-builder roman-thousand-units roman-hundreds))
-(defn thousand-units-hundreds-tens-units []
-  (str ((comp rand-nth vec) roman-thousand-units)
-       hundreds-tens-unit))
+(def tens-units-gen
+  (gen/fmap (partial apply str) (gen/tuple roman-tens-gen roman-units-gen)))
 
-(s/def ::combinations (s/and string? ::roman-number-valid))
-(s/def ::roman-number (s/or ::units ::tens ::hundreds ::thousand-unit))
+(def hundreds-units-gen
+  (gen/fmap (partial apply str) (gen/tuple roman-hundreds-gen roman-units-gen)))
+
+(def hundreds-tens-gen
+  (gen/fmap (partial apply str) (gen/tuple roman-hundreds-gen roman-tens-gen)))
+
+(def thousand-units-units-gen
+  (gen/fmap (partial apply str) (gen/tuple roman-thousand-units-gen roman-units-gen)))
+
+(def thousand-units-tens-units-gen
+  (gen/fmap (partial apply str) (gen/tuple roman-thousand-units-gen roman-tens-gen roman-units-gen)))
+
+(def thousand-units-hundreds-gen
+  (gen/fmap (partial apply str) (gen/tuple roman-thousand-units-gen roman-hundreds-gen)))
+
+(def thousand-units-hundreds-tens-gen
+  (gen/fmap (partial apply str) (gen/tuple roman-thousand-units-gen roman-hundreds-gen roman-tens-gen)))
+
+(def thousand-units-hundreds-tens-units-gen
+  (gen/fmap (partial apply str) (gen/tuple roman-thousand-units-gen roman-hundreds-gen roman-tens-gen roman-units-gen)))
+
+(s/def ::roman-number (s/with-gen string? #(gen/one-of [roman-units-gen
+                                                        roman-tens-gen
+                                                        roman-hundreds-gen
+                                                        roman-thousand-units-gen
+                                                        tens-units-gen
+                                                        hundreds-units-gen
+                                                        hundreds-tens-gen
+                                                        thousand-units-units-gen
+                                                        thousand-units-tens-units-gen
+                                                        thousand-units-hundreds-gen
+                                                        thousand-units-hundreds-tens-gen
+                                                        thousand-units-hundreds-tens-units-gen])))
