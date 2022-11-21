@@ -102,8 +102,8 @@
   [i]
   {:pre  (s/valid? ::specs/integer i)
    :post (s/valid? ::specs/roman-number %)}
-  (let [drop-amount  (length->drop-amount (-> i str count))
-        units (drop drop-amount [1000 100 10 1])]
+  (let [drop-amount (length->drop-amount (-> i str count))
+        units       (drop drop-amount [1000 100 10 1])]
     (->> (digits i)
          (map vector units)                                 ; zip i with units
          (map (partial apply *))                            ; multiply units with digits
@@ -127,6 +127,16 @@
   "given a valid string representing a roman number
   between [1-3999], delivers a decimal representation"
   [& args]
-  (try (operation args)
-       (catch Exception e
-         (prn "Invalid roman number" (e :message)))))
+  (try
+    (let [first-arg       (first args)
+          is-it-a-number? (number? (try (Long/parseLong first-arg) ; number or false!! :´-(
+                                        (catch NumberFormatException _e false)))]
+      (if is-it-a-number? (-> first-arg
+                              Long/parseLong
+                              operation
+                              prn)
+                          (-> first-arg
+                              operation
+                              prn)))
+    (catch Exception _e
+      (prn (str (first args) " is not a valid number. Try with a number between 1 and 3999")))))

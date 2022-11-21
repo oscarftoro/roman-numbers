@@ -8,9 +8,14 @@ git Clone, Clojure compile and java -jar run.
 
 ## Usage
 
-FIXME: pass some roman number as argument to the app. For instance "XXI" 
+Pass some roman number or decimal number as argument to the app.
 
     $ java -jar roman-number-to-int-0.1.0-standalone.jar [args]
+
+For example
+
+    $ java -jar target/uberjar/roman-numbers-0.1.0-SNAPSHOT-standalone.jar MDXIX
+    $ java -jar target/uberjar/roman-numbers-0.1.0-SNAPSHOT-standalone.jar 1984
 
 ## Options
 
