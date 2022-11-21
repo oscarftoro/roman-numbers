@@ -4,7 +4,7 @@ Convert a Roman Number between [1-3999] into an Integer and the opposite.
 
 ## Installation
 
-git Clone, Clojure compile and java -jar run. 
+The uberjar is in the target folder. You can also `git clone` and run with `lein run`.
 
 ## Usage
 
